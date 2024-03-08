@@ -11,19 +11,21 @@ class FieldConsole:
 
     def generate(self):
         field = [
-            [constant.EMPTY_CHAR for x in range(8)] for y in range(8)
+            ["*" if (x == 0 or x == 9) or (y == 0 or y == 9) else constant.EMPTY_CHAR for x in range(10)]
+            for y in range(10)
         ]
-        for y in range(self.y):
-            for x in range(self.x):
+
+        for y in range(1, self.y + 1):
+            for x in range(1, self.x + 1):
                 if (y + x) % 2:
-                    if y < 3:
+                    if y < 4:
                         field[y][x] = constant.EMPTY_CHECKER_BLACK
-                    elif y >= self.y - 3:
+                    elif y >= self.y - 2:
                         field[y][x] = constant.EMPTY_CHECKER_WHITE
         return field
 
     def show_field(self):
-        print(' ', '1', '2', '3', '4', '5', '6', '7', '8')
+        print(' ', '0', '1', '2', '3', '4', '5', '6', '7', '8')
         for y, v in enumerate(constant.VERTICAL_COORDINATES):
             print(v, ' '.join(self.table[y]))
 
