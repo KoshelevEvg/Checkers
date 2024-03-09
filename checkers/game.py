@@ -20,8 +20,10 @@ class Game:
         else:
             return constant.EMPTY_CHECKER_WHITE
 
-    def get_user_position(self, field, char):
+    def get_user_position(self, field_object, char):
+        field = field_object.table
         real_x, real_y = 0, 0
+
 
         while True:
 
@@ -64,6 +66,10 @@ class Game:
                     if field[real_y][real_x] == constant.EMPTY_CHECKER_BLACK and field[real_y - 1][real_x + 1] != "*":
                         field[real_y - 1][real_x + 1] = char
                         field[real_y][real_x] = constant.EMPTY_CHAR
+                        if self.check_attack(field, char):
+                            print("Need attack")
+                            field_object.show_field()
+                            continue
                         break
                     else:
                         print("Don't move checker")
@@ -71,6 +77,10 @@ class Game:
                     if field[real_y][real_x] == constant.EMPTY_CHECKER_BLACK and field[real_y - 1][real_x - 1] != "*":
                         field[real_y - 1][real_x - 1] = char
                         field[real_y][real_x] = constant.EMPTY_CHAR
+                        if self.check_attack(field, char):
+                            print("Need attack")
+                            field_object.show_field()
+                            continue
                         break
                     else:
                         print("Don't move checker")
@@ -79,6 +89,10 @@ class Game:
                     if field[real_y][real_x] == constant.EMPTY_CHECKER_WHITE and field[real_y + 1][real_x + 1] != "*":
                         field[real_y + 1][real_x + 1] = char
                         field[real_y][real_x] = constant.EMPTY_CHAR
+                        if self.check_attack(field, char):
+                            print("Need attack")
+                            field_object.show_field()
+                            continue
                         break
                     else:
                         print("Don't move checker")
@@ -86,6 +100,10 @@ class Game:
                     if field[real_y][real_x] == constant.EMPTY_CHECKER_WHITE and field[real_y + 1][real_x - 1] != "*":
                         field[real_y + 1][real_x - 1] = char
                         field[real_y][real_x] = constant.EMPTY_CHAR
+                        if self.check_attack(field, char):
+                            print("Need attack")
+                            field_object.show_field()
+                            continue
                         break
                     else:
                         print("Don't move checker")
