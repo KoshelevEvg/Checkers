@@ -16,9 +16,9 @@ def main():
     user_char = user_1.get_user_char()
     second_user = user_2.get_opponent_char(user_char)
     while True:
-        x, y = user_1.get_user_position(b.table, user_char)
+        x, y = user_1.get_user_position(b, user_char)
         b.show_field()
-        user_2.get_user_position(b.table, second_user)
+        user_2.get_user_position(b, second_user)
 
 
         # print("!")
