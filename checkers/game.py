@@ -23,15 +23,21 @@ class Game:
     def get_user_position(self, field_object, char):
         field = field_object.table
         real_x, real_y = 0, 0
-
+        dy = (-1,-1)
+        dx = (-1, 1)
 
         while True:
-
+            new_char = ""
+            invalid_turn = 0
+            self.check_swap_checkers(field)
             flag, y_list, x_list = self.check_attack(field, char)
             user_char = input(f"User {self.name_user} Select checker: ").strip(" ").lower()
             old_y, old_x = tuple(user_char)
             old_x, old_y = int(old_x), constant.VERTICAL_COORDINATES.index(old_y)
-            check_turn = self.turn(old_x, old_y, char)
+            if field[old_y][old_x] == constant.CHECKER_WHITE_QUEEN:
+                new_char = constant.CHECKER_WHITE_QUEEN
+            elif field[old_y][old_x] == constant.CHECKER_BLACK_QUEEN:
+                new_char = constant.CHECKER_BLACK_QUEEN
 
             cords = input(f"User {self.name_user} Input coordinates: ").lower().strip(" ")
             y, x = tuple(cords)
@@ -44,12 +50,21 @@ class Game:
             if field[real_y][real_x] == "*":
                 print("Not valid turn")
                 continue
-            if (real_x not in check_turn["x"] and real_y in check_turn["y"]) \
-                    or (real_x in check_turn["x"] and real_y not in check_turn["y"]) \
-                    or (real_x not in check_turn["x"] and real_y not in check_turn["y"]):
+            if not flag:
+                for k in range(len(dy)):
+                    if char == constant.EMPTY_CHECKER_WHITE:
+                        if (real_y == old_y + dy[k] and real_x != old_x + dx[k]) \
+                                or (real_y != old_y + dy[k] and real_x == old_x + dx[k]) \
+                                or (real_y != old_y + dy[k] and real_x != old_x + dx[k]):
+                            invalid_turn += 1
+                    elif char == constant.EMPTY_CHECKER_BLACK:
+                        if (real_y == old_y - dy[k] and real_x != old_x - dx[k]) \
+                                or (real_y != old_y - dy[k] and real_x == old_x - dx[k]) \
+                                or (real_y != old_y - dy[k] and real_x != old_x - dx[k]):
+                            invalid_turn += 1
+            if invalid_turn == 2:
                 print("Not valid turn")
                 continue
-
             if flag:
                 if real_x in x_list and real_y in y_list:
                     print("Kill")
@@ -57,61 +72,21 @@ class Game:
                     print("Need Attack")
                     continue
 
+            if new_char != "":
+                self.turn_queen(real_y, real_x, old_y, old_x, field, new_char)
+
             if field[real_y][real_x] == constant.EMPTY_CHAR:
                 field[real_y][real_x] = char
                 # if not self.before_turn_white(field, real_x, real_y):
                 break
-            elif field[real_y][real_x] == constant.EMPTY_CHECKER_BLACK and char == constant.EMPTY_CHECKER_WHITE:
-                if real_x - old_x >= 1:
-                    if field[real_y][real_x] == constant.EMPTY_CHECKER_BLACK and field[real_y - 1][real_x + 1] != "*":
-                        field[real_y - 1][real_x + 1] = char
-                        field[real_y][real_x] = constant.EMPTY_CHAR
-                        flag, _, _ = self.check_attack(field, char)
-                        if flag:
-                            print("Need attack")
-                            field_object.show_field()
-                            continue
-                        break
-                    else:
-                        print("Don't move checker")
-                elif real_x - old_x <= -1:
-                    if field[real_y][real_x] == constant.EMPTY_CHECKER_BLACK and field[real_y - 1][real_x - 1] != "*":
-                        field[real_y - 1][real_x - 1] = char
-                        field[real_y][real_x] = constant.EMPTY_CHAR
-                        flag, _, _ = self.check_attack(field, char)
-                        if flag:
-                            print("Need attack")
-                            field_object.show_field()
-                            continue
-                        break
-                    else:
-                        print("Don't move checker")
-            elif field[real_y][real_x] == constant.EMPTY_CHECKER_WHITE and char == constant.EMPTY_CHECKER_BLACK:
-                if real_x - old_x >= 1:
-                    if field[real_y][real_x] == constant.EMPTY_CHECKER_WHITE and field[real_y + 1][real_x + 1] != "*":
-                        field[real_y + 1][real_x + 1] = char
-                        field[real_y][real_x] = constant.EMPTY_CHAR
-                        flag, _, _ = self.check_attack(field, char)
-                        if flag:
-                            print("Need attack")
-                            field_object.show_field()
-                            continue
-                        break
-                    else:
-                        print("Don't move checker")
-                elif real_x - old_x <= -1:
-                    if field[real_y][real_x] == constant.EMPTY_CHECKER_WHITE and field[real_y + 1][real_x - 1] != "*":
-                        field[real_y + 1][real_x - 1] = char
-                        field[real_y][real_x] = constant.EMPTY_CHAR
-                        flag, _, _ = self.check_attack(field, char)
-                        if flag:
-                            print("Need attack")
-                            field_object.show_field()
-                            continue
-                        break
-                    else:
-                        print("Don't move checker")
-
+            elif self.action(field, real_x, real_y, old_x, old_y, char):
+                print("Need attack")
+                if field[old_y][old_x] == char:
+                    field[old_y][old_x] = constant.EMPTY_CHAR
+                field_object.show_field()
+                continue
+            else:
+                break
         if field[old_y][old_x] == char:
             field[old_y][old_x] = constant.EMPTY_CHAR
         return real_x, real_y
@@ -149,8 +124,8 @@ class Game:
             return True, black["y"], black["x"]
 
     def before_turn_white(self, field, real_x, real_y, char):
-        dy = (-1, -1)
-        dx = (-1, 1)
+        dy = (1, 1, -1, -1)
+        dx = (-1, 1, -1, 1)
         attack_zone_y = []
         attack_zone_x = []
         for k in range(len(dx)):
@@ -161,8 +136,8 @@ class Game:
         return attack_zone_y, attack_zone_x
 
     def before_turn_black(self, field, real_x, real_y, char):
-        dy = (1, 1)
-        dx = (-1, 1)
+        dy = (1, 1, -1, -1)
+        dx = (-1, 1, -1, 1)
         attack_zone_y = []
         attack_zone_x = []
         for k in range(len(dx)):
@@ -174,40 +149,50 @@ class Game:
 
     @staticmethod
     def after_attack(field, real_x, real_y, char):
-        if char == constant.EMPTY_CHECKER_WHITE:
-            if field[real_y - 1][real_x - 1] == constant.EMPTY_CHECKER_BLACK and field[real_y - 2][real_x - 2] == constant.EMPTY_CHAR:
-                return True
-            elif field[real_y - 1][real_x + 1] == constant.EMPTY_CHECKER_BLACK and field[real_y - 2][real_x + 2] == constant.EMPTY_CHAR:
-                return True
-
-
-                # if field[real_y - 2][real_x - 2] == constant.EMPTY_CHAR and:
-                #     return True
-                # elif field[real_y + constant.DELTA_Y_WHITE[k]][real_x + constant.DELTA_X_WHITE[k]] == "*":
-
-        else:
-            if field[real_y + 1][real_x - 1] == constant.EMPTY_CHECKER_WHITE and field[real_y + 2][real_x - 2] == constant.EMPTY_CHAR:
-                return True
-            elif field[real_y + 1][real_x + 1] == constant.EMPTY_CHECKER_WHITE and field[real_y + 2][real_x + 2] == constant.EMPTY_CHAR:
-                return True
+        dy = (-1, 1,-1, 1)
+        dx = (-1,-1, 1, 1)
+        for k in range(len(dy)):
+            if char == constant.EMPTY_CHECKER_WHITE:
+                if field[real_y + dy[k]][real_x + dx[k]] == constant.EMPTY_CHECKER_BLACK \
+                        and field[real_y + dy[k] * 2][real_x + dx[k] * 2] == constant.EMPTY_CHAR:
+                    return True
+            else:
+                if field[real_y + dy[k]][real_x + dx[k]] == constant.EMPTY_CHECKER_WHITE \
+                        and field[real_y + dy[k] * 2][real_x + dx[k] * 2] == constant.EMPTY_CHAR:
+                    return True
         return False
 
+    def action(self, field, real_x, real_y, old_x, old_y, char):
+        dx = 1 if real_x > old_x else -1
+        dy = -1 if real_y < old_y else 1
+
+        if field[real_y][real_x] == constant.EMPTY_CHECKER_BLACK and field[real_y + dy][real_x + dx] != "*" \
+                and field[real_y + dy][real_x + dx] == constant.EMPTY_CHAR:
+            field[real_y + dy][real_x + dx] = char
+            field[real_y][real_x] = constant.EMPTY_CHAR
+            flag, _, _ = self.check_attack(field, char)
+            return flag
+        elif field[real_y][real_x] == constant.EMPTY_CHECKER_WHITE and field[real_y + dy][real_x + dx] != "*" \
+                and field[real_y + dy][real_x + dx] == constant.EMPTY_CHAR:
+            field[real_y + dy][real_x + dx] = char
+            field[real_y][real_x] = constant.EMPTY_CHAR
+            flag, _, _ = self.check_attack(field, char)
+            return flag
+        return False
+
+
     @staticmethod
-    def turn(x, y, char):
-        turn_list = {
-            "y": [],
-            "x": []
-        }
-        if char == constant.EMPTY_CHECKER_WHITE:
-            dy = (-1, -1)
-            dx = (-1, 1)
-            for k in range(len(dy)):
-                turn_list["y"].append(y + dy[k])
-                turn_list["x"].append(x + dx[k])
-        elif char == constant.EMPTY_CHECKER_BLACK:
-            dy = (1, 1)
-            dx = (-1, 1)
-            for k in range(len(dy)):
-                turn_list["y"].append(y + dy[k])
-                turn_list["x"].append(x + dx[k])
-        return turn_list
+    def check_swap_checkers(field):
+        for k in range(1, len(field) - 2):
+            if field[1][k] == constant.EMPTY_CHECKER_WHITE:
+                field[1][k] = constant.CHECKER_WHITE_QUEEN
+        for k in range(1, len(field) - 2):
+            if field[8][k] == constant.EMPTY_CHECKER_BLACK:
+                field[8][k] = constant.CHECKER_BLACK_QUEEN
+
+    # @staticmethod
+    def turn_queen(self, real_y, real_x, old_y, old_x, field, new_char):
+        while not self.action(field, real_x, real_y, old_x, old_y, new_char):
+            pass
+        print("!!!")
+
