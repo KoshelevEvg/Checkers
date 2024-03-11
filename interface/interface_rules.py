@@ -1,12 +1,15 @@
-from typing import Protocol
+from checkers.move import Move
 
 
-class Rules(Protocol):
-    def move(self, current_pos, next_pos):
+class IRules:
+    def move(self, field, current_coord: Move, user):
         pass
 
-    def attack(self, attack_pos):
+    def attack(self, field, attack_pos: Move, user):
         pass
 
-    def change_type(self):
+    def check_valid_turn(self, field, possible_moves, attacks_list):
+        pass
+
+    def swap_checkers(self, field):
         pass
