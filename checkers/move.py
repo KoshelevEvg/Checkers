@@ -1,5 +1,4 @@
 
-
 class Move:
 
     def __init__(self, from_x, from_y, to_x, to_y):
@@ -39,3 +38,19 @@ class Move:
     @to_y.setter
     def to_y(self, value):
         self.__to_y = value
+
+    def __str__(self):
+        return f'{self.from_x}-{self.from_y} -> {self.to_x}-{self.to_y}'
+
+    def __repr__(self):
+        return f'{self.from_x}-{self.from_y} -> {self.to_x}-{self.to_y}'
+
+    def __eq__(self, other):
+        if isinstance(other, Move):
+            return (
+                self.from_x == other.from_x and
+                self.from_y == other.from_y and
+                self.to_x == other.to_x and
+                self.to_y == other.to_y
+            )
+        return NotImplemented

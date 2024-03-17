@@ -8,7 +8,7 @@ class Rules(IRules):
     def __init__(self):
         pass
 
-    def move(self, field, current_coord: Move, user):
+    def move(self, field, current_coord: Move, char):
         dx = 1 if current_coord.to_x > current_coord.from_x else -1
         dy = -1 if current_coord.to_y < current_coord.from_y else 1
 
@@ -19,41 +19,42 @@ class Rules(IRules):
         #     friendly_checkers = constant.BLACK_CHECKERS
         #     enemy_checkers = constant.WHITE_CHECKERS
 
-        if field[current_coord.from_y][current_coord.from_x] == user.char:
+        if field[current_coord.from_y][current_coord.from_x] == char:
             if field[current_coord.to_y][current_coord.to_x] == constant.EMPTY_CHAR:
-                field[current_coord.to_y][current_coord.to_x] = user.char
+                field[current_coord.to_y][current_coord.to_x] = char
                 field[current_coord.from_y][current_coord.from_x] = constant.EMPTY_CHAR
                 return True
             else:
-                if self.attack(field, current_coord, user):
+                if self.attack(field, current_coord, char):
                     field[current_coord.from_y][current_coord.from_x] = constant.EMPTY_CHAR
                     field[current_coord.to_y][current_coord.to_x] = constant.EMPTY_CHAR
                     current_coord.from_y = current_coord.to_y + dy
                     current_coord.from_x = current_coord.to_x + dx
                     return True
+        return False
 
-    def attack(self, field, attack_pos: Move, user):
+    def attack(self, field, attack_pos: Move, char):
         dx = 1 if attack_pos.to_x > attack_pos.from_x else -1
         dy = -1 if attack_pos.to_y < attack_pos.from_y else 1
 
         if field[attack_pos.to_y][attack_pos.to_x] == constant.EMPTY_CHECKER_BLACK:
             if field[attack_pos.to_y + dy][attack_pos.to_x + dx] == constant.EMPTY_CHAR:
-                field[attack_pos.to_y + dy][attack_pos.to_x + dx] = user.char
+                field[attack_pos.to_y + dy][attack_pos.to_x + dx] = char
                 self.swap_checkers(field)
                 return True
         elif field[attack_pos.to_y][attack_pos.to_x] == constant.EMPTY_CHECKER_WHITE:
             if field[attack_pos.to_y + dy][attack_pos.to_x + dx] == constant.EMPTY_CHAR:
-                field[attack_pos.to_y + dy][attack_pos.to_x + dx] = user.char
+                field[attack_pos.to_y + dy][attack_pos.to_x + dx] = char
                 self.swap_checkers(field)
                 return True
         elif field[attack_pos.to_y][attack_pos.to_x] == constant.CHECKER_WHITE_QUEEN:
             if field[attack_pos.to_y + dy][attack_pos.to_x + dx] == constant.EMPTY_CHAR:
-                field[attack_pos.to_y + dy][attack_pos.to_x + dx] = user.char
+                field[attack_pos.to_y + dy][attack_pos.to_x + dx] = char
                 self.swap_checkers(field)
                 return True
         elif field[attack_pos.to_y][attack_pos.to_x] == constant.CHECKER_BLACK_QUEEN:
             if field[attack_pos.to_y + dy][attack_pos.to_x + dx] == constant.EMPTY_CHAR:
-                field[attack_pos.to_y + dy][attack_pos.to_x + dx] = user.char
+                field[attack_pos.to_y + dy][attack_pos.to_x + dx] = char
                 self.swap_checkers(field)
                 return True
         return False
@@ -62,6 +63,8 @@ class Rules(IRules):
         y_list = []
         x_list = []
         count = 0
+        if len(possible_moves) == 1:
+            return False
         if len(attacks_list) != 0:
             for k in range(len(attacks_list)):
                 if possible_moves[0].to_y == attacks_list[k].to_y and possible_moves[0].to_x == attacks_list[k].to_x:
@@ -90,7 +93,7 @@ class Rules(IRules):
         return False
 
     def swap_checkers(self, field):
-        for x in range(1, 8):
+        for x in range(1, 9):
             if field[1][x] == constant.EMPTY_CHECKER_WHITE:
                 field[1][x] = constant.CHECKER_WHITE_QUEEN
             elif field[8][x] == constant.EMPTY_CHECKER_BLACK:
@@ -124,6 +127,7 @@ class Rules(IRules):
                 flag = True
                 return flag
         return flag
+
     def move_queen(self, field, coord: Move, list_attack):
         count = ()
         for i in range(len(list_attack)):
@@ -140,8 +144,8 @@ class Rules(IRules):
     def is_win(self, field, user):
         count_black = 0
         count_white = 0
-        for y in range(1, 8):
-            for x in range(1, 8):
+        for y in range(1, 9):
+            for x in range(1, 9):
                 if field[y][x] in constant.BLACK_CHECKERS:
                     count_black += 1
                 elif field[y][x] in constant.WHITE_CHECKERS:

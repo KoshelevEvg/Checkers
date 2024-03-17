@@ -114,47 +114,71 @@ class Player(IPlayer):
                         attack_list.append(move)
         return turns, attack_list
 
-    def input_coord(self, field_object):
-        move = Move(0, 0, 0, 0)
-        user_char = input(f"User {self.name} Select checker: ").strip(" ").lower()
-        move.from_y, move.from_x = tuple(user_char)
-        move.from_x, move.from_y = int(move.from_x), constant.VERTICAL_COORDINATES.index(move.from_y)
-        cords = input(f"User {self.name} Input coordinates: ").lower().strip(" ")
-        y, x = tuple(cords)
-        if self.char == constant.EMPTY_CHECKER_BLACK \
-                and field_object[move.from_y][move.from_x] == constant.CHECKER_BLACK_QUEEN:
-            self.char = constant.CHECKER_BLACK_QUEEN
-        elif self.char == constant.EMPTY_CHECKER_WHITE \
-                and field_object[move.from_y][move.from_x] == constant.CHECKER_WHITE_QUEEN:
-            self.char = constant.CHECKER_WHITE_QUEEN
-
-        while True:
-            if self.char != field_object[move.from_y][move.from_x] \
-                    or x not in constant.HORIZONTAL_COORDINATES \
-                    or y not in constant.VERTICAL_COORDINATES:
-                print("Not valid checkers")
-                user_char = input(f"User {self.name} Select checker: ").strip(" ").lower()
-                move.from_y, move.from_x = tuple(user_char)
-                move.from_x, move.from_y = int(move.from_x), constant.VERTICAL_COORDINATES.index(move.from_y)
-                cords = input(f"User {self.name} Input coordinates: ").lower().strip(" ")
-                y, x = tuple(cords)
-                continue
-            else:
-                break
-        move.to_x, move.to_y = int(x), constant.VERTICAL_COORDINATES.index(y)
-        return move
-
-    def insert_position(self, field_object):
+    # def input_coord(self, field_object):
+    #     move = Move(0, 0, 0, 0)
+    #     user_char = input(f"User {self.name} Select checker: ").strip(" ").lower()
+    #     move.from_y, move.from_x = tuple(user_char)
+    #     move.from_x, move.from_y = int(move.from_x), constant.VERTICAL_COORDINATES.index(move.from_y)
+    #     cords = input(f"User {self.name} Input coordinates: ").lower().strip(" ")
+    #     y, x = tuple(cords)
+    #     if self.char == constant.EMPTY_CHECKER_BLACK \
+    #             and field_object[move.from_y][move.from_x] == constant.CHECKER_BLACK_QUEEN:
+    #         self.char = constant.CHECKER_BLACK_QUEEN
+    #     elif self.char == constant.EMPTY_CHECKER_WHITE \
+    #             and field_object[move.from_y][move.from_x] == constant.CHECKER_WHITE_QUEEN:
+    #         self.char = constant.CHECKER_WHITE_QUEEN
+    #
+    #     while True:
+    #         if self.char != field_object[move.from_y][move.from_x] \
+    #                 or x not in constant.HORIZONTAL_COORDINATES \
+    #                 or y not in constant.VERTICAL_COORDINATES:
+    #             print("Not valid checkers")
+    #             user_char = input(f"User {self.name} Select checker: ").strip(" ").lower()
+    #             move.from_y, move.from_x = tuple(user_char)
+    #             move.from_x, move.from_y = int(move.from_x), constant.VERTICAL_COORDINATES.index(move.from_y)
+    #             cords = input(f"User {self.name} Input coordinates: ").lower().strip(" ")
+    #             y, x = tuple(cords)
+    #             continue
+    #         else:
+    #             break
+    #     move.to_x, move.to_y = int(x), constant.VERTICAL_COORDINATES.index(y)
+    #     return move
+    #
+    # def insert_position(self, field_object):
+    #     rule = Rules()
+    #     # flag_queen = True
+    #     move_user = self.input_coord(field_object)
+    #     if field_object[move_user.from_y][move_user.from_x] == constant.CHECKER_BLACK_QUEEN \
+    #             or field_object[move_user.from_y][move_user.from_x] == constant.CHECKER_WHITE_QUEEN:
+    #         list_turn_queen, list_attack_turn_queen = self.turns_queen(field_object, move_user)
+    #         flag_queen = rule.check_move_queen(list_turn_queen, list_attack_turn_queen)
+    #         while not flag_queen:
+    #             print("Don't valid queen turn, retry plz")
+    #             move_user = self.input_coord(field_object)
+    #             list_turn_queen, list_attack_turn_queen = self.turns_queen(field_object, move_user)
+    #             flag_queen = rule.check_move_queen(list_turn_queen, list_attack_turn_queen)
+    #             continue
+    #         return move_user, list_attack_turn_queen
+    #     turns_user, attacks_list = self.get_turn(field_object, move_user, self.char)
+    #     attacks_list = self.check_attack(field_object)
+    #     flag = rule.check_valid_turn(field_object, turns_user, attacks_list)
+    #     while not flag:
+    #         print("Don't valid turn, retry plz")
+    #         move_user = self.input_coord(field_object)
+    #         turns_user, attacks_list = self.get_turn(field_object, move_user, self.char)
+    #         flag = rule.check_valid_turn(field_object, turns_user, attacks_list)
+    #         continue
+    #     return move_user, attacks_list
+    def UI_insert_position(self, field_object, move_user):
         rule = Rules()
         # flag_queen = True
-        move_user = self.input_coord(field_object)
         if field_object[move_user.from_y][move_user.from_x] == constant.CHECKER_BLACK_QUEEN \
                 or field_object[move_user.from_y][move_user.from_x] == constant.CHECKER_WHITE_QUEEN:
             list_turn_queen, list_attack_turn_queen = self.turns_queen(field_object, move_user)
             flag_queen = rule.check_move_queen(list_turn_queen, list_attack_turn_queen)
             while not flag_queen:
                 print("Don't valid queen turn, retry plz")
-                move_user = self.input_coord(field_object)
+                # move_user = self.input_coord(field_object)
                 list_turn_queen, list_attack_turn_queen = self.turns_queen(field_object, move_user)
                 flag_queen = rule.check_move_queen(list_turn_queen, list_attack_turn_queen)
                 continue
@@ -164,7 +188,7 @@ class Player(IPlayer):
         flag = rule.check_valid_turn(field_object, turns_user, attacks_list)
         while not flag:
             print("Don't valid turn, retry plz")
-            move_user = self.input_coord(field_object)
+            # move_user = self.input_coord(field_object)
             turns_user, attacks_list = self.get_turn(field_object, move_user, self.char)
             flag = rule.check_valid_turn(field_object, turns_user, attacks_list)
             continue
