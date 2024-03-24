@@ -1,4 +1,3 @@
-from checkers import constant
 from checkers.checker import Checker
 from checkers.enums import CheckerType
 
