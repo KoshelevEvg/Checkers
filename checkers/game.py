@@ -8,12 +8,10 @@ from pathlib import Path
 from checkers.enums import SideType, CheckerType
 from checkers.field import FieldConsole
 from checkers.move import Move
-from checkers.player import Player
 from checkers.point import Point
-from checkers.rules import Rules
 
 
-class Game(Rules, Player):
+class Game:
     def __init__(self, canvas: Canvas, x_field_size: int, y_field_size: int):
         super().__init__()
         self.__field = FieldConsole(8, 8)
@@ -83,12 +81,10 @@ class Game(Rules, Player):
                                                       tag='posible_move_circle')
 
     def __draw_checkers(self):
-        """Отрисовка шашек"""
+        """Отображение шашек"""
         for y in range(0, 10):
             for x in range(0, 10):
                 # Не отрисовывать пустые ячейки и анимируемую шашку
-                # if self.__field.type_at(x, y) != 1 and not (
-                #         x == self.__animated_cell.x and y == self.__animated_cell.y):
                 if self.__field.type_at(x, y) != CheckerType.NOT_VALID \
                         and not (x == self.__animated_cell.x and y == self.__animated_cell.y):
                     self.__canvas.create_image(x * CELL_SIZE, y * CELL_SIZE,
@@ -122,7 +118,7 @@ class Game(Rules, Player):
         elif self.__player_turn:
             move = Move(self.__selected_cell.x, self.__selected_cell.y, x, y)
 
-            # Если нажатие по ячейке, на которую можно походить
+            # Если нажатие по клетке, на которую можно сходить
             if move in self.get_moves_list(self.__player_side):
                 self.handle_player_turn(move)
                 self.__player_turn = True
@@ -156,18 +152,18 @@ class Game(Rules, Player):
         if draw:
             self.animate_move(move)
 
-        # Изменение типа шашки, если она дошла до края
+        # Изменение вида шашки, если она дошла до края
         if move.to_y == 1 and self.__field.type_at(move.from_x, move.from_y) == CheckerType.EMPTY_CHECKER_WHITE:
             self.__field.at(move.from_x, move.from_y).change_type(CheckerType.CHECKER_WHITE_QUEEN)
         elif move.to_y == self.__field.y \
                 and self.__field.type_at(move.from_x, move.from_y) == CheckerType.EMPTY_CHECKER_BLACK:
             self.__field.at(move.from_x, move.from_y).change_type(CheckerType.CHECKER_BLACK_QUEEN)
 
-        # Изменение позиции шашки
+        # Движение шашки
         self.__field.at(move.to_x, move.to_y).change_type(self.__field.type_at(move.from_x, move.from_y))
         self.__field.at(move.from_x, move.from_y).change_type(CheckerType.EMPTY_CHAR)
 
-        # Вектор движения
+        # Направление движения
         dx = -1 if move.from_x < move.to_x else 1
         dy = -1 if move.from_y < move.to_y else 1
 
@@ -203,7 +199,7 @@ class Game(Rules, Player):
             game_over = True
 
         if game_over:
-            self.__init__(self.__canvas, self.__field.x, self.__field.y)
+            self.__init__(self.__canvas, self.__field.x, self.__field.y, self.__player_side)
 
     def animate_move(self, move: Move):
         self.__animated_cell = Point(move.from_x, move.from_y)
@@ -228,6 +224,7 @@ class Game(Rules, Player):
         self.__animated_cell = Point()
 
     def get_moves_list(self, side: SideType):
+        """Получение списка ходов"""
         moves_list = self.get_required_moves_list(side)
         if not moves_list:
             moves_list = self.get_optional_moves_list(side)
@@ -235,6 +232,7 @@ class Game(Rules, Player):
 
     # @staticmethod
     def get_required_moves_list(self, side: SideType):
+        """Получение списка обязательных ходов"""
         moves_list = []
 
         if side == SideType.WHITE:
@@ -287,7 +285,7 @@ class Game(Rules, Player):
         return moves_list
 
     def get_optional_moves_list(self, side: SideType):
-        """Получение списка необязательных ходов"""
+        """Получение списка опциональных ходов"""
         moves_list = []
 
         if side == SideType.WHITE:
